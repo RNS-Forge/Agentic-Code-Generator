@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Generator - CrewAI Powered</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark-bg: #1a1a2e;
+            --light-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --shadow-light: 0 10px 25px rgba(0,0,0,0.1);
+            --shadow-medium: 0 15px 35px rgba(0,0,0,0.15);
+            --shadow-heavy: 0 20px 40px rgba(0,0,0,0.2);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 100% 50%; }
+            50% { background-position: 0% 100%; }
+            75% { background-position: 100% 0%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating Code Symbols */
+        .code-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .code-particle {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.1);
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            animation: floatCode 15s linear infinite;
+            transform: rotate(45deg);
+        }
+
+        @keyframes floatCode {
+            0% { 
+                transform: translateY(100vh) translateX(-50px) rotate(0deg); 
+                opacity: 0; 
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { 
+                transform: translateY(-100px) translateX(50px) rotate(360deg); 
+                opacity: 0; 
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+            animation: slideInDown 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: pulse 3s ease-in-out infinite alternate;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.02); }
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease-out 0.5s both;
+            font-weight: 400;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 0.95;
+                transform: translateY(0);
+            }
+        }
+
+        /* Crew Info Section */
+        .crew-info {
+            background: var(--light-bg);
+            backdrop-filter: blur(20px);
+            padding: 35px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 40px;
+            animation: slideInUp 1s ease-out 0.3s both;
+            transition: var(--transition);
+        }
+
+        .crew-info:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .crew-info h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .crew-info h3::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .agent-card {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 30px 25px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            animation: scaleIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .agent-card:nth-child(even) {
+            background: var(--secondary-gradient);
+        }
+
+        .agent-card:nth-child(3n) {
+            background: var(--success-gradient);
+        }
+
+        .agent-card:nth-child(4n) {
+            background: var(--warning-gradient);
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8) rotateY(180deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotateY(0deg);
+            }
+        }
+
+        .agent-card:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .agent-card:hover::before {
+            left: 100%;
+        }
+
+        .agent-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .agent-card h4 {
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+
+        .agent-card p {
+            font-size: 0.95em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 2;
+            line-height: 1.5;
+        }
+
+        .agent-card.active {
+            animation: agentWorking 1.5s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+        }
+
+        @keyframes agentWorking {
+            0%, 100% { transform: translateY(-10px) scale(1.02); }
+            50% { transform: translateY(-15px) scale(1.05); }
+        }
+
+        /* Main Content Grid */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .input-section, .output-section {
+            background: var(--light-bg);
+            backdrop-filter: blur(20px);
+            padding: 35px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+            animation: slideInLeft 1s ease-out 0.6s both;
+        }
+
+        .output-section {
+            animation: slideInRight 1s ease-out 0.8s both;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .input-section:hover, .output-section:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .section-title {
+            color: #667eea;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            font-weight: 600;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            font-size: 0.8em;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95em;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 18px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.9);
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        textarea {
+            min-height: 120px;
+            max-height: 200px;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: scale(1.01);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .input-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-gradient);
+            transition: width 0.3s ease;
+        }
+
+        .input-container:focus-within::after {
+            width: 100%;
+        }
+
+        .generate-btn {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            width: 100%;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .generate-btn:hover::before {
+            left: 100%;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .generate-btn.processing {
+            animation: processingPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes processingPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .btn-icon {
+            font-size: 1.2em;
+            animation: spin 2s linear infinite;
+        }
+
+        .generate-btn:not(.processing) .btn-icon {
+            animation: none;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 50px 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px;
+        }
+
+        .loading-text {
+            color: #667eea;
+            font-size: 22px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .loading-steps {
+            color: var(--text-secondary);
+            font-size: 16px;
+            line-height: 2.2;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .loading-steps div {
+            opacity: 0.3;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 8px 0;
+            transform: translateX(-30px);
+            border-radius: 8px;
+            margin: 5px 0;
+        }
+
+        .loading-steps div.active {
+            opacity: 1;
+            transform: translateX(0);
+            color: #667eea;
+            font-weight: 600;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 12px 20px;
+        }
+
+        /* Output Section */
+        .code-output {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            border-left: 5px solid #667eea;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            max-height: 600px;
+            overflow-y: auto;
+            animation: slideInUp 0.8s ease-out;
+            position: relative;
+            word-break: break-word;
+        }
+
+        .code-output::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+            background-size: 200% 100%;
+            animation: gradientMove 3s linear infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            border-left: 4px solid #dc3545;
+            animation: shake 0.6s ease-in-out;
+            font-weight: 500;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: var(--success-gradient);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .action-btn.copied, .action-btn.downloaded {
+            background: var(--warning-gradient);
+            animation: successPulse 0.6s ease-out;
+        }
+
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+            padding: 25px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: var(--border-radius);
+            animation: fadeIn 0.8s ease-out 0.3s both;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Template Cards */
+        .templates-section {
+            margin-top: 40px;
+            padding: 35px;
+            background: var(--light-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideInUp 1s ease-out 1s both;
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .template-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .template-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+            border-color: #667eea;
+        }
+
+        .template-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .template-card p {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .template-tech {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .agents-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+            
+            .container {
+                padding: 15px;
+            }
+
+            .input-section, .output-section, .crew-info {
+                padding: 25px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                min-width: auto;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .agents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Success animation */
+        .success-celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5em;
+            z-index: 1000;
+            animation: celebrate 3s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes celebrate {
+            0% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0) rotate(0deg); 
+            }
+            50% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.5) rotate(180deg); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(1) rotate(360deg); 
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-gradient);
+        }
+
+        /* Fade in animation class */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Code Particles -->
+    <div class="code-particles">
+        <div class="code-particle" style="left: 10%; animation-delay: 0s;">&lt;/&gt;</div>
+        <div class="code-particle" style="left: 20%; animation-delay: 2s;">{}</div>
+        <div class="code-particle" style="left: 30%; animation-delay: 4s;">[]</div>
+        <div class="code-particle" style="left: 40%; animation-delay: 6s;">()</div>
+        <div class="code-particle" style="left: 50%; animation-delay: 8s;">;</div>
+        <div class="code-particle" style="left: 60%; animation-delay: 10s;">=&gt;</div>
+        <div class="code-particle" style="left: 70%; animation-delay: 12s;">/**/</div>
+        <div class="code-particle" style="left: 80%; animation-delay: 14s;">&amp;&amp;</div>
+        <div class="code-particle" style="left: 90%; animation-delay: 1s;">||</div>
+        <div class="code-particle" style="left: 15%; animation-delay: 3s;">===</div>
+        <div class="code-particle" style="left: 25%; animation-delay: 5s;">!==</div>
+        <div class="code-particle" style="left: 35%; animation-delay: 7s;">++</div>
+        <div class="code-particle" style="left: 45%; animation-delay: 9s;">--</div>
+        <div class="code-particle" style="left: 55%; animation-delay: 11s;">??</div>
+        <div class="code-particle" style="left: 65%; animation-delay: 13s;">...</div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-code"></i> AI Code Generator</h1>
+            <p>Powered by CrewAI & Gemini - Professional Code Generation with Multi-Agent Architecture</p>
+        </header>
+
+        <div class="crew-info">
+            <h3><i class="fas fa-users"></i> Meet Your Development Crew</h3>
+            <p>Our specialized AI agents collaborate to deliver complete, production-ready code solutions through an advanced multi-phase development process:</p>
+            
+            <div class="agents-grid">
+                <div class="agent-card" id="agent-1">
+                    <div class="icon"><i class="fas fa-project-diagram"></i></div>
+                    <h4>Flowchart Generator</h4>
+                    <p>Creates detailed visual representations of application logic and workflow architecture</p>
+                </div>
+                <div class="agent-card" id="agent-2">
+                    <div class="icon"><i class="fas fa-cogs"></i></div>
+                    <h4>Technology Advisor</h4>
+                    <p>Analyzes requirements and recommends optimal technology stack for your project</p>
+                </div>
+                <div class="agent-card" id="agent-3">
+                    <div class="icon"><i class="fas fa-building"></i></div>
+                    <h4>Architecture Designer</h4>
+                    <p>Designs comprehensive system architecture and component relationships</p>
+                </div>
+                <div class="agent-card" id="agent-4">
+                    <div class="icon"><i class="fas fa-laptop-code"></i></div>
+                    <h4>Code Generator</h4>
+                    <p>Generates clean, efficient, and well-structured code in multiple languages</p>
+                </div>
+                <div class="agent-card" id="agent-5">
+                    <div class="icon"><i class="fas fa-palette"></i></div>
+                    <h4>Design Enhancer</h4>
+                    <p>Enhances code with modern UI/UX, animations, and interactive features</p>
+                </div>
+                <div class="agent-card" id="agent-6">
+                    <div class="icon"><i class="fas fa-bug"></i></div>
+                    <h4>Error Fixer</h4>
+                    <p>Identifies and resolves bugs, ensuring clean and optimized code output</p>
+                </div>
+                <div class="agent-card" id="agent-7">
+                    <div class="icon"><i class="fas fa-vial"></i></div>
+                    <h4>Testing Specialist</h4>
+                    <p>Performs comprehensive testing to ensure reliability and performance</p>
+                </div>
+                <div class="agent-card" id="agent-8">
+                    <div class="icon"><i class="fas fa-shipping-fast"></i></div>
+                    <h4>Delivery Specialist</h4>
+                    <p>Packages final solution with documentation and deployment instructions</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">
+                    <i class="fas fa-edit"></i>
+                    Project Specification
+                </h2>
+                <form id="codeForm">
+                    <div class="form-group">
+                        <label for="project_description"><i class="fas fa-lightbulb"></i> Project Description:</label>
+                        <div class="input-container">
+                            <textarea 
+                                id="project_description" 
+                                name="project_description" 
+                                placeholder="Describe your project in detail... (e.g., 'Create a modern e-commerce website with user authentication, product catalog, shopping cart, and payment integration')"
+                                required
+                            ></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="requirements"><i class="fas fa-list-check"></i> Additional Requirements (Optional):</label>
+                        <div class="input-container">
+                            <textarea 
+                                id="requirements" 
+                                name="requirements" 
+                                placeholder="Specify any additional requirements, technologies, or constraints... (e.g., 'Use React.js, include responsive design, integrate with Stripe API, add admin dashboard')"
+                            ></textarea>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="generate-btn" id="generateBtn">
+                        <i class="fas fa-rocket btn-icon"></i>
+                        Generate Complete Solution
+                    </button>
+                </form>
+            </div>
+
+            <div class="output-section">
+                <h2 class="section-title">
+                    <i class="fas fa-file-code"></i>
+                    Generated Solution
+                </h2>
+                
+                <div id="loading" class="loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Crafting your solution...</div>
+                    <div class="loading-steps">
+                        <div id="step-1"><i class="fas fa-project-diagram"></i> Creating application flowchart...</div>
+                        <div id="step-2"><i class="fas fa-cogs"></i> Selecting optimal technology stack...</div>
+                        <div id="step-3"><i class="fas fa-building"></i> Designing system architecture...</div>
+                        <div id="step-4"><i class="fas fa-laptop-code"></i> Generating core functionality...</div>
+                        <div id="step-5"><i class="fas fa-palette"></i> Enhancing UI/UX design...</div>
+                        <div id="step-6"><i class="fas fa-bug"></i> Fixing errors and optimizing...</div>
+                        <div id="step-7"><i class="fas fa-vial"></i> Testing all components...</div>
+                        <div id="step-8"><i class="fas fa-shipping-fast"></i> Finalizing deliverables...</div>
+                    </div>
+                </div>
+                
+                <div id="output">
+                    <div style="color: #888; font-style: italic; text-align: center; padding: 50px 20px; border-radius: 12px; background: rgba(102, 126, 234, 0.05);">
+                        <i class="fas fa-code" style="font-size: 3em; margin-bottom: 20px; color: #667eea;"></i>
+                        <p style="font-size: 1.1em; margin-bottom: 10px;">Ready to create something amazing?</p>
+                        <p>Describe your project above and let our AI crew build a complete solution for you!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="templates-section">
+            <h3 class="section-title">
+                <i class="fas fa-layer-group"></i>
+                Project Templates & Inspiration
+            </h3>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
+                Click on any template to auto-fill your project description
+            </p>
+            <div class="templates-grid" id="templatesGrid">
+                <!-- Templates will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        const steps = ['step-1', 'step-2', 'step-3', 'step-4', 'step-5', 'step-6', 'step-7', 'step-8'];
+        const agents = ['agent-1', 'agent-2', 'agent-3', 'agent-4', 'agent-5', 'agent-6', 'agent-7', 'agent-8'];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProjectTemplates();
+            addFloatingParticles();
+        });
+
+        function addFloatingParticles() {
+            const particles = document.querySelector('.code-particles');
+            const symbols = ['&lt;div&gt;', 'function()', 'const', 'let', 'var', 'if()', 'else', 'for()', 'while()', 'class', 'import', 'export', 'async', 'await', 'return', '&amp;&amp;', '||', '===', '!==', '&lt;=&gt;', '...', '??', '?.', '&amp;', '|', '^', '~', '&lt;&lt;', '&gt;&gt;'];
+            
+            setInterval(() => {
+                if (document.querySelectorAll('.code-particle').length < 25) {
+                    const particle = document.createElement('div');
+                    particle.className = 'code-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDelay = '0s';
+                    particle.style.fontSize = (Math.random() * 10 + 15) + 'px';
+                    particle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                    particles.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 15000);
+                }
+            }, 2000);
+        }
+
+        async function loadProjectTemplates() {
+            try {
+                const response = await fetch('/project_templates');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const templatesGrid = document.getElementById('templatesGrid');
+                    templatesGrid.innerHTML = data.templates.map(template => `
+                        <div class="template-card" onclick="fillTemplate('${template.name}', '${template.description}', '${template.tech_stack}')">
+                            <h4>${template.name}</h4>
+                            <p>${template.description}</p>
+                            <div class="template-tech">${template.tech_stack}</div>
+                            <div style="margin-top: 10px;">
+                                ${template.features.map(feature => `<span style="background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; margin: 2px; display: inline-block;">${feature}</span>`).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.log('Templates not available');
+            }
+        }
+
+        function fillTemplate(name, description, techStack) {
+            const projectDesc = document.getElementById('project_description');
+            const requirements = document.getElementById('requirements');
+            
+            projectDesc.value = `${name}: ${description}`;
+            requirements.value = `Technology Stack: ${techStack}\nPlease include:\n- Modern, responsive design\n- Clean, well-documented code\n- Error handling and validation\n- Mobile-friendly interface`;
+            
+            // Add visual feedback
+            projectDesc.style.background = 'rgba(102, 126, 234, 0.1)';
+            requirements.style.background = 'rgba(102, 126, 234, 0.1)';
+            
+            setTimeout(() => {
+                projectDesc.style.background = '';
+                requirements.style.background = '';
+            }, 1000);
+            
+            // Scroll to form
+            document.querySelector('.input-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function animateLoadingSteps() {
+            // Reset previous step
+            if (currentStep > 0) {
+                const prevStep = document.getElementById(steps[currentStep - 1]);
+                const prevAgent = document.getElementById(agents[currentStep - 1]);
+                if (prevStep) prevStep.classList.remove('active');
+                if (prevAgent) prevAgent.classList.remove('active');
+            }
+            
+            // Activate current step
+            if (currentStep < steps.length) {
+                const currentStepEl = document.getElementById(steps[currentStep]);
+                const currentAgent = document.getElementById(agents[currentStep]);
+                if (currentStepEl) currentStepEl.classList.add('active');
+                if (currentAgent) currentAgent.classList.add('active');
+                currentStep++;
+                
+                // Continue to next step after delay
+                setTimeout(animateLoadingSteps, 3000);
+            }
+        }
+
+        function resetLoadingAnimation() {
+            currentStep = 0;
+            steps.forEach(step => {
+                const el = document.getElementById(step);
+                if (el) el.classList.remove('active');
+            });
+            agents.forEach(agent => {
+                const el = document.getElementById(agent);
+                if (el) el.classList.remove('active');
+            });
+        }
+
+        function showSuccessCelebration() {
+            const celebration = document.createElement('div');
+            celebration.classList.add('success-celebration');
+            celebration.innerHTML = '🎉✨🚀';
+            document.body.appendChild(celebration);
+            
+            setTimeout(() => {
+                if (document.body.contains(celebration)) {
+                    document.body.removeChild(celebration);
+                }
+            }, 3000);
+        }
+
+        document.getElementById('codeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const projectDescription = document.getElementById('project_description').value.trim();
+            const requirements = document.getElementById('requirements').value.trim();
+            
+            if (!projectDescription) {
+                alert('Please provide a project description');
+                return;
+            }
+            
+            const generateBtn = document.getElementById('generateBtn');
+            const loading = document.getElementById('loading');
+            const output = document.getElementById('output');
+            
+            // Show loading state with animations
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner btn-icon"></i> Generating...';
+            generateBtn.classList.add('processing');
+            loading.style.display = 'block';
+            output.innerHTML = '';
+            
+            // Start loading animation
+            resetLoadingAnimation();
+            setTimeout(animateLoadingSteps, 800);
+            
+            try {
+                const response = await fetch('/generate_code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        project_description: projectDescription,
+                        requirements: requirements 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show success celebration
+                    showSuccessCelebration();
+                    
+                    // Create stats if available
+                    let statsHtml = '';
+                    if (data.stats) {
+                        statsHtml = `
+                            <div class="stats-container">
+                                <div class="stat-item">
+                                    <span class="stat-number">${data.stats.agents_used}</span>
+                                    <div class="stat-label">AI Agents</div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">${data.stats.word_count}</span>
+                                    <div class="stat-label">Words Generated</div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">${data.stats.lines_of_code || 'N/A'}</span>
+                                    <div class="stat-label">Lines of Code</div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">8</span>
+                                    <div class="stat-label">Processing Phases</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    output.innerHTML = `
+                        <div class="code-output">${data.generated_code}</div>
+                        ${statsHtml}
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="copyCode()">
+                                <i class="fas fa-copy"></i> Copy Code
+                            </button>
+                            <button class="action-btn" onclick="downloadCode()">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                            <button class="action-btn" onclick="shareCode()">
+                                <i class="fas fa-share"></i> Share
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    output.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i> Error: ${data.error}</div>`;
+                }
+                
+            } catch (error) {
+                output.innerHTML = `<div class="error"><i class="fas fa-wifi"></i> Network Error: ${error.message}</div>`;
+            } finally {
+                // Hide loading state
+                loading.style.display = 'none';
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-rocket btn-icon"></i> Generate Complete Solution';
+                generateBtn.classList.remove('processing');
+                
+                // Reset agent animations
+                setTimeout(() => {
+                    agents.forEach(agent => {
+                        const el = document.getElementById(agent);
+                        if (el) el.classList.remove('active');
+                    });
+                }, 2000);
+            }
+        });
+        
+        function copyCode() {
+            const codeText = document.querySelector('.code-output').textContent;
+            navigator.clipboard.writeText(codeText).then(function() {
+                const btn = event.target.closest('.action-btn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('copied');
+                }, 2500);
+            }).catch(function(err) {
+                alert('Failed to copy code');
+            });
+        }
+        
+        function downloadCode() {
+            const codeText = document.querySelector('.code-output').textContent;
+            const blob = new Blob([codeText], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'generated-code.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            const btn = event.target.closest('.action-btn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Downloaded!';
+            btn.classList.add('downloaded');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('downloaded');
+            }, 2500);
+        }
+        
+        function shareCode() {
+            if (navigator.share) {
+                const codeText = document.querySelector('.code-output').textContent;
+                navigator.share({
+                    title: 'Generated Code from AI Code Generator',
+                    text: codeText.substring(0, 200) + '...',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback to copying link
+                navigator.clipboard.writeText(window.location.href);
+                const btn = event.target.closest('.action-btn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Link Copied!';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                }, 2500);
+            }
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                document.getElementById('codeForm').dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Add auto-resize for textareas
+        document.querySelectorAll('textarea').forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+        });
+
+        // Add smooth scroll behavior for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add typing effect for placeholders
+        function updatePlaceholders() {
+            const projectPlaceholders = [
+                'Create a modern e-commerce website with user authentication and payment integration...',
+                'Build a social media dashboard with analytics and content management...',
+                'Develop a task management app with team collaboration features...',
+                'Design a blog platform with rich text editor and comment system...',
+                'Build a real-time chat application with file sharing capabilities...'
+            ];
+            
+            const reqPlaceholders = [
+                'Use React.js and Node.js, include responsive design...',
+                'Integrate with third-party APIs, add admin dashboard...',
+                'Include dark mode, implement real-time updates...',
+                'Add mobile app version, include offline functionality...',
+                'Implement advanced search, add notification system...'
+            ];
+            
+            let projectIndex = 0;
+            let reqIndex = 0;
+            
+            setInterval(() => {
+                const projectTextarea = document.getElementById('project_description');
+                const reqTextarea = document.getElementById('requirements');
+                
+                if (projectTextarea && projectTextarea !== document.activeElement) {
+                    projectTextarea.placeholder = projectPlaceholders[projectIndex];
+                    projectIndex = (projectIndex + 1) % projectPlaceholders.length;
+                }
+                
+                if (reqTextarea && reqTextarea !== document.activeElement) {
+                    reqTextarea.placeholder = reqPlaceholders[reqIndex];
+                    reqIndex = (reqIndex + 1) % reqPlaceholders.length;
+                }
+            }, 4000);
+        }
+        
+        updatePlaceholders();
+    </script>
+</body>
+</html>
